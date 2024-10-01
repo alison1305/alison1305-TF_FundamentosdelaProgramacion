@@ -1,4 +1,4 @@
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 // Clase Producto
@@ -35,59 +35,92 @@ class Producto {
     }
 }
 
-// Clase Almacen que agrupa las categorías y productos
-class Almacen {
-    private HashMap<String, Producto[]> categorias;
+// Clase Categoria que agrupa productos
+class Categoria {
+    private String nombre;
+    private ArrayList<Producto> productos;
 
-    public Almacen() {
-        categorias = new HashMap<>();
-
-        // Cargando las categorías con productos específicos
-        categorias.put("Explosivos", new Producto[]{
-                new Producto("EXP001", "Dinamita", 50),
-                new Producto("EXP002", "C4", 20),
-                new Producto("EXP003", "Nitroglicerina", 30)
-        });
-
-        categorias.put("Aceros", new Producto[]{
-                new Producto("ACR001", "Placa de acero", 100),
-                new Producto("ACR002", "Tubo de acero", 75)
-        });
-
-        categorias.put("EPPs", new Producto[]{
-                new Producto("EPP001", "Casco de seguridad", 200),
-                new Producto("EPP002", "Botas de seguridad", 150),
-                new Producto("EPP003", "Chaleco reflectante", 100)
-        });
-
-        categorias.put("Maderas", new Producto[]{
-                new Producto("MAD001", "Tablón de madera", 50),
-                new Producto("MAD002", "Viga de madera", 30)
-        });
-
-        categorias.put("Artículos de Oficina", new Producto[]{
-                new Producto("OFI001", "Resma de papel", 100),
-                new Producto("OFI002", "Bolígrafos", 200),
-                new Producto("OFI003", "Carpetas", 150)
-        });
-
-        categorias.put("Artículos de Limpieza", new Producto[]{
-                new Producto("LIM001", "Detergente", 80),
-                new Producto("LIM002", "Escobas", 40)
-        });
-
-        categorias.put("Repuestos de Perforadoras", new Producto[]{
-                new Producto("REP001", "Broca de perforadora", 50),
-                new Producto("REP002", "Filtro de perforadora", 20)
-        });
+    public Categoria(String nombre) {
+        this.nombre = nombre;
+        this.productos = new ArrayList<>();
     }
 
-    // Mostrar productos de una categoría
-    public void mostrarProductos(String categoria) {
-        if (categorias.containsKey(categoria)) {
-            Producto[] productos = categorias.get(categoria);
-            System.out.println("\n--- Productos en " + categoria + " ---");
-            for (Producto producto : productos) {
+    public String getNombre() {
+        return nombre;
+    }
+
+    public ArrayList<Producto> getProductos() {
+        return productos;
+    }
+
+    public void agregarProducto(Producto producto) {
+        productos.add(producto);
+    }
+
+    public Producto buscarProductoPorCodigo(String codigo) {
+        for (Producto producto : productos) {
+            if (producto.getCodigo().equals(codigo)) {
+                return producto;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return nombre;
+    }
+}
+
+// Clase Almacen que gestiona las categorías
+class Almacen {
+    private ArrayList<Categoria> categorias;
+
+    public Almacen() {
+        categorias = new ArrayList<>();
+
+        // Agregando categorías y productos
+        Categoria explosivos = new Categoria("Explosivos");
+        explosivos.agregarProducto(new Producto("EXP001", "Dinamita", 50));
+        explosivos.agregarProducto(new Producto("EXP002", "C4", 20));
+        explosivos.agregarProducto(new Producto("EXP003", "Nitroglicerina", 30));
+        categorias.add(explosivos);
+
+        Categoria aceros = new Categoria("Aceros");
+        aceros.agregarProducto(new Producto("ACR001", "Placa de acero", 100));
+        aceros.agregarProducto(new Producto("ACR002", "Tubo de acero", 75));
+        categorias.add(aceros);
+
+        Categoria epps = new Categoria("EPPs");
+        epps.agregarProducto(new Producto("EPP001", "Casco de seguridad", 200));
+        epps.agregarProducto(new Producto("EPP002", "Botas de seguridad", 150));
+        epps.agregarProducto(new Producto("EPP003", "Chaleco reflectante", 100));
+        categorias.add(epps);
+
+        // Otras categorías...
+    }
+
+    public void mostrarCategorias() {
+        System.out.println("\n--- Categorías Disponibles ---");
+        for (Categoria categoria : categorias) {
+            System.out.println(categoria);
+        }
+    }
+
+    public Categoria buscarCategoriaPorNombre(String nombre) {
+        for (Categoria categoria : categorias) {
+            if (categoria.getNombre().equalsIgnoreCase(nombre)) {
+                return categoria;
+            }
+        }
+        return null;
+    }
+
+    public void mostrarProductos(String nombreCategoria) {
+        Categoria categoria = buscarCategoriaPorNombre(nombreCategoria);
+        if (categoria != null) {
+            System.out.println("\n--- Productos en " + nombreCategoria + " ---");
+            for (Producto producto : categoria.getProductos()) {
                 System.out.println(producto);
             }
         } else {
@@ -95,53 +128,37 @@ class Almacen {
         }
     }
 
-    // Mostrar categorías disponibles
-    public void mostrarCategorias() {
-        System.out.println("\n--- Categorías Disponibles ---");
-        for (String categoria : categorias.keySet()) {
-            System.out.println(categoria);
-        }
-    }
-
-    // Añadir un nuevo producto a una categoría
-    public void agregarProducto(String categoria, Producto nuevoProducto) {
-        if (categorias.containsKey(categoria)) {
-            Producto[] productosExistentes = categorias.get(categoria);
-            Producto[] nuevosProductos = new Producto[productosExistentes.length + 1];
-
-            System.arraycopy(productosExistentes, 0, nuevosProductos, 0, productosExistentes.length);
-            nuevosProductos[productosExistentes.length] = nuevoProducto;
-
-            categorias.put(categoria, nuevosProductos);
-            System.out.println("Producto agregado exitosamente a la categoría " + categoria);
+    public void agregarProducto(String nombreCategoria, Producto nuevoProducto) {
+        Categoria categoria = buscarCategoriaPorNombre(nombreCategoria);
+        if (categoria != null) {
+            categoria.agregarProducto(nuevoProducto);
+            System.out.println("Producto agregado exitosamente a la categoría " + nombreCategoria);
         } else {
             System.out.println("Categoría no encontrada.");
         }
     }
 
-    // Realizar salida de un producto
-    public void realizarSalida(String categoria, String codigo, int cantidadSalida) {
-        if (categorias.containsKey(categoria)) {
-            Producto[] productos = categorias.get(categoria);
-            for (Producto producto : productos) {
-                if (producto.getCodigo().equals(codigo)) {
-                    if (producto.getCantidad() >= cantidadSalida) {
-                        producto.reducirCantidad(cantidadSalida);
-                        System.out.println("Salida realizada: " + cantidadSalida + " unidades de " + producto.getNombre());
-                    } else {
-                        System.out.println("No hay suficiente cantidad disponible para realizar la salida.");
-                    }
-                    return;
+    public void realizarSalida(String nombreCategoria, String codigoProducto, int cantidadSalida) {
+        Categoria categoria = buscarCategoriaPorNombre(nombreCategoria);
+        if (categoria != null) {
+            Producto producto = categoria.buscarProductoPorCodigo(codigoProducto);
+            if (producto != null) {
+                if (producto.getCantidad() >= cantidadSalida) {
+                    producto.reducirCantidad(cantidadSalida);
+                    System.out.println("Salida realizada: " + cantidadSalida + " unidades de " + producto.getNombre());
+                } else {
+                    System.out.println("No hay suficiente cantidad disponible para realizar la salida.");
                 }
+            } else {
+                System.out.println("Producto no encontrado en la categoría.");
             }
-            System.out.println("Producto no encontrado en la categoría.");
         } else {
             System.out.println("Categoría no encontrada.");
         }
     }
 }
 
-// Clase principal para la simulación
+// Clase principal
 public class GestionAlmacen {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
